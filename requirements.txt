@@ -1,0 +1,46 @@
+# Streamlit-only frontend (FastAPI removed)
+
+# Streamlit (existing UI)
+streamlit>=1.35
+streamlit-google-auth
+streamlit-webrtc>=0.47.0
+streamlit-js-eval>=0.1.5
+
+# LLM and AI
+openai>=1.30.0
+langchain>=0.1.0
+langchain-openai>=0.0.5
+langchain-community>=0.0.20
+faiss-cpu>=1.7.4
+fastembed>=0.5.0
+pinecone>=3.0.0
+tiktoken>=0.7.0
+
+# NumPy and Pandas (Python 3.13 compatible)
+numpy>=1.26.0
+pandas>=2.2.0
+
+# File Processing
+PyPDF2>=3.0.1
+pydub>=0.25.1
+SpeechRecognition>=3.10.0
+
+# Database
+pymongo>=4.6.0
+dnspython>=2.0.0  # Required for MongoDB Atlas connection strings
+
+# Security
+passlib>=1.7.4
+
+# Utilities
+requests>=2.31.0
+python-dotenv>=1.0.0
+plotly>=5.18.0
+
+# FastAPI Backend
+fastapi>=0.110.0
+uvicorn[standard]>=0.27.0
+python-multipart>=0.0.9
+email-validator>=2.0.0
+
+
