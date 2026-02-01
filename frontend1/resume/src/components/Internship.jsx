@@ -3,54 +3,54 @@ import { motion } from "framer-motion";
 
 const alumni = [
   {
-    name: "Ayaz Khan",
-    role: "Senior Software Engineer",
-    company: "Google",
+    name: "Akash Bajpai",
+    role: "Associate Consultant ",
+    company: "Trinity Life Sciences",
     batch: "2018 Batch",
     description:
-      "Mentors students on backend engineering, system design, and scalable architectures. Known for structured guidance on interview preparation and translating academic projects into industry-ready systems.",
+      "Hi, my name is Akash Bajpai, from the 2018-22 (ECE) batch of IIIT Bhagalpur. When I joined the institute, it was still new, with little to no student-attraction events or established clubs. This gave me both the opportunity and the responsibility to actively contribute to shaping the cultural and technical fabric of our campus. From participating in various events to personally establishing multiple clubs in 2019 and 2020, I worked to create platforms that, along with other student-led initiatives, have now become an integral part of campus life",
     image:
-      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=400",
+      "https://ik.imagekit.io/6p6e7glhp/Akash_Bajpai.jpg?updatedAt=1757748975778",
   },
   {
-    name: "Ritik Gupta",
-    role: "Product Designer II",
-    company: "Amazon",
-    batch: "2019 Batch",
+    name: "Rajan Sandilya",
+    role: "R&D Engineer",
+    company: "Synopsys Inc",
+    batch: "2018 Batch",
     description:
-      "Guides students through UX research, portfolio building, and product case studies. Provides actionable feedback on usability, visual hierarchy, and real-world design workflows.",
-    image:
-      "https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=400",
+      "Hi, my name is Rajan, from the 2018 batch of the ECE department. My journey at IIIT Bhagalpur was filled with challenges, learnings, and memories that continue to stay with me. Serving as the Vice President of the Student Gymkhana Council was one of the most defining phases of my college life. It gave me the chance to build bridges between students and administration, and to ensure that student voices were heard in shaping our campus culture.",
+      image:
+      "https://ik.imagekit.io/6p6e7glhp/Rajan_Sandilya.jpg?updatedAt=1757622430363",
   },
   {
-    name: "Neha Sharma",
-    role: "Data Scientist",
-    company: "Microsoft",
-    batch: "2020 Batch",
+    name: "Mehul Tyagi",
+    role: "Software Engineer 2",
+    company: "Practo",
+    batch: "2017 Batch",
     description:
       "Supports students interested in data science by mentoring on machine learning fundamentals, analytics projects, and practical applications in real-world business scenarios.",
     image:
-      "https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=400",
+      "https://ik.imagekit.io/6p6e7glhp/Mehul_Tyagi.jpg?updatedAt=1757748729625",
   },
   {
-    name: "Arjun Verma",
-    role: "Senior DevOps Engineer",
-    company: "Netflix",
-    batch: "2017 Batch",
+    name: "Gourav Pareek",
+    role: "Specialist Programmer",
+    company: "Infosys",
+    batch: "2019 Batch",
     description:
-      "Mentors students on cloud infrastructure, CI/CD pipelines, and production reliability. Emphasizes best practices for scalable and secure systems.",
-    image:
-      "https://images.unsplash.com/photo-1527980965255-d3b416303d12?q=80&w=400",
+      "Hey, I’m Gourav Pareek, from the 2019–23 batch, Mechatronics and Automation Engineering (MAE). My IIIT Bhagalpur journey was full of vibes and memories. I had the chance to serve as the Vice President of the Student Gymkhana Council, and leading the team to pull off the first-ever offline techno-cultural fest, Enyugma, was truly next level. From planning to execution, it was a ride that taught me teamwork and leadership like nothing else.",
+        image:
+      "https://ik.imagekit.io/6p6e7glhp/gaurav%20pareek.jpg?updatedAt=1757441875324",
   },
   {
-    name: "Sneha Iyer",
+    name: "Devyanshu Singha",
     role: "Founder & CEO",
     company: "Early-stage Startup",
-    batch: "2016 Batch",
+    batch: "2020 Batch",
     description:
-      "Advises students on startup ideation, MVP validation, and early-stage product strategy, balancing technical execution with business fundamentals.",
-    image:
-      "https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?q=80&w=400",
+      "Hi, my name is Devyanshu Singhal from the 2020-24 batch, Computer Science and Engineering department at IIIT Bhagalpur. One of my best memories is working tirelessly as Fest Manager for Enyugma, our first offline Techno-Cultural Fest. Bringing the event to life was both challenging and incredibly rewarding, bringing together students, faculty, and a true spirit of collaboration." ,
+     image:
+      "https://ik.imagekit.io/6p6e7glhp/Divyanshu_Singal.jpg?updatedAt=1757620345294",
   },
 ];
 

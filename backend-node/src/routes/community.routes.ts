@@ -761,7 +761,8 @@ router.post('/session-requests/:sessionId/vote', async (req: Request, res: Respo
       success: true,
       message: hasVoted ? 'Vote removed' : 'Vote added',
       hasVoted: !hasVoted,
-      votes: session.votes.length
+      votes: session.votes.length,
+      votesList: session.votes
     });
   } catch (error: any) {
     console.error('Error voting on session:', error);

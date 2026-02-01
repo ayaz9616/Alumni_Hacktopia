@@ -6,6 +6,7 @@ import Stats from './Stats';
 import PlatformModules from './PlatformModules';
 import FAQ from './FAQ';
 import TopRatedAlumni from './Internship';
+import StickyCards from './StickyCards';
 
 function Home() {
   const sectionRef = useRef(null);
@@ -47,6 +48,7 @@ function Home() {
 
       <PlatformModules />
             <TopRatedAlumni/>
+            <StickyCards/>
       <FAQ />
     </div>
   );
