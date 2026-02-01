@@ -67,6 +67,7 @@ export interface IUser extends Document {
   email: string;
   name: string;
   role: UserRole;
+  password?: string; // Optional for OAuth users
   profilePicture?: string;
   createdAt: Date;
   updatedAt: Date;
@@ -329,6 +330,7 @@ const UserSchema = new Schema({
     enum: Object.values(UserRole), 
     required: true 
   },
+  password: { type: String }, // Optional for OAuth users
   profilePicture: String
 }, {
   timestamps: true

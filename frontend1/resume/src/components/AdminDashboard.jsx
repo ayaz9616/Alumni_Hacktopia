@@ -1,210 +1,193 @@
-import { useState, useEffect } from 'react';
-import { 
-  getAdminOverview,
-  getAlumniPerformance,
-  getFeedbackSummary,
-  getPopularDomains
-} from '../services/mentorshipApi';
+import React, { useState, useEffect } from 'react';
+import { Users, Briefcase, Calendar, TrendingUp, Activity } from 'lucide-react';
 
-function AdminDashboard() {
-  const [overview, setOverview] = useState(null);
-  const [topAlumni, setTopAlumni] = useState([]);
-  const [feedback, setFeedback] = useState(null);
-  const [domains, setDomains] = useState(null);
-  const [loading, setLoading] = useState(true);
+const AdminDashboard = () => {
+  const [stats, setStats] = useState({
+    totalUsers: 0,
+    totalAlumni: 0,
+    totalStudents: 0,
+    totalJobs: 0,
+    totalSessions: 0,
+    activeSessions: 0
+  });
 
   useEffect(() => {
-    loadData();
+    // Simulated data - replace with actual API calls
+    setStats({
+      totalUsers: 847,
+      totalAlumni: 422,
+      totalStudents: 425,
+      totalJobs: 156,
+      totalSessions: 89,
+      activeSessions: 23
+    });
   }, []);
 
-  const loadData = async () => {
-    try {
-      setLoading(true);
-      const [overviewRes, alumniRes, feedbackRes, domainsRes] = await Promise.all([
-        getAdminOverview(),
-        getAlumniPerformance(10),
-        getFeedbackSummary(),
-        getPopularDomains()
-      ]);
-
-      setOverview(overviewRes.overview);
-      setTopAlumni(alumniRes.topAlumni || []);
-      setFeedback(feedbackRes.feedbackSummary);
-      setDomains(domainsRes.popularDomains);
-    } catch (err) {
-      console.error('Failed to load admin data:', err);
-    } finally {
-      setLoading(false);
+  const statCards = [
+    {
+      title: 'Total Users',
+      value: stats.totalUsers,
+      icon: Users,
+      color: 'text-blue-500',
+      bgColor: 'bg-blue-500/10',
+      borderColor: 'border-blue-500/20'
+    },
+    {
+      title: 'Alumni',
+      value: stats.totalAlumni,
+      icon: Users,
+      color: 'text-green-500',
+      bgColor: 'bg-green-500/10',
+      borderColor: 'border-green-500/20'
+    },
+    {
+      title: 'Students',
+      value: stats.totalStudents,
+      icon: Users,
+      color: 'text-purple-500',
+      bgColor: 'bg-purple-500/10',
+      borderColor: 'border-purple-500/20'
+    },
+    {
+      title: 'Total Jobs',
+      value: stats.totalJobs,
+      icon: Briefcase,
+      color: 'text-orange-500',
+      bgColor: 'bg-orange-500/10',
+      borderColor: 'border-orange-500/20'
+    },
+    {
+      title: 'Total Sessions',
+      value: stats.totalSessions,
+      icon: Calendar,
+      color: 'text-cyan-500',
+      bgColor: 'bg-cyan-500/10',
+      borderColor: 'border-cyan-500/20'
+    },
+    {
+      title: 'Active Sessions',
+      value: stats.activeSessions,
+      icon: Activity,
+      color: 'text-pink-500',
+      bgColor: 'bg-pink-500/10',
+      borderColor: 'border-pink-500/20'
     }
-  };
+  ];
 
-  if (loading) {
-    return <div className="loading">Loading dashboard...</div>;
-  }
+  const recentActivities = [
+    { user: 'John Doe', action: 'registered as Alumni', time: '5 min ago' },
+    { user: 'Jane Smith', action: 'posted a new job', time: '15 min ago' },
+    { user: 'Mike Johnson', action: 'requested a session', time: '30 min ago' },
+    { user: 'Sarah Williams', action: 'updated profile', time: '1 hour ago' },
+    { user: 'David Brown', action: 'joined community event', time: '2 hours ago' }
+  ];
 
   return (
-    <div className="admin-dashboard">
-      <h1>👨‍💼 Admin Dashboard</h1>
-      <p>Platform Analytics & Insights</p>
+    <div className="text-white">
+      {/* Header */}
+      <div className="mb-8">
+        <h1 className="text-3xl font-medium mb-2">Dashboard</h1>
+        <p className="text-neutral-400">Welcome back, Admin</p>
+      </div>
 
-      {overview && (
-        <>
-          <div className="dashboard-grid">
-            <div className="stat-card">
-              <div className="stat-value">{overview.users.total}</div>
-              <div className="stat-label">Total Users</div>
-              <div className="stat-breakdown">
-                {overview.users.students} Students | {overview.users.alumni} Alumni
+      {/* Stats Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+        {statCards.map((stat, index) => {
+          const Icon = stat.icon;
+          return (
+            <div
+              key={index}
+              className={`rounded-xl border ${stat.borderColor} ${stat.bgColor} p-6`}
+            >
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-neutral-400 mb-1">{stat.title}</p>
+                  <p className="text-3xl font-bold">{stat.value}</p>
+                </div>
+                <div className={`p-3 rounded-lg ${stat.bgColor}`}>
+                  <Icon size={24} className={stat.color} />
+                </div>
               </div>
             </div>
+          );
+        })}
+      </div>
 
-            <div className="stat-card">
-              <div className="stat-value">{overview.profiles.studentProfiles}</div>
-              <div className="stat-label">Student Profiles</div>
-              <div className="stat-breakdown">
-                {overview.profiles.profileCompletionRate.students} completion
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Recent Activities */}
+        <div className="border border-white/10 rounded-xl p-6 bg-neutral-950">
+          <h2 className="text-lg font-medium mb-4">Recent Activities</h2>
+          <div className="space-y-4">
+            {recentActivities.map((activity, index) => (
+              <div
+                key={index}
+                className="flex items-start gap-3 pb-4 border-b border-white/10 last:border-0"
+              >
+                <div className="w-2 h-2 rounded-full bg-green-500 mt-2 flex-shrink-0" />
+                <div className="flex-1">
+                  <p className="text-sm text-white">
+                    <span className="font-medium">{activity.user}</span> {activity.action}
+                  </p>
+                  <p className="text-xs text-neutral-500 mt-1">{activity.time}</p>
+                </div>
               </div>
-            </div>
+            ))}
+          </div>
+        </div>
 
-            <div className="stat-card">
-              <div className="stat-value">{overview.profiles.alumniProfiles}</div>
-              <div className="stat-label">Alumni Profiles</div>
-              <div className="stat-breakdown">
-                {overview.profiles.profileCompletionRate.alumni} completion
-              </div>
-            </div>
+        {/* Quick Actions */}
+        <div className="border border-white/10 rounded-xl p-6 bg-neutral-950">
+          <h2 className="text-lg font-medium mb-4">Quick Actions</h2>
+          <div className="space-y-3">
+            <button className="w-full text-left px-4 py-3 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 transition">
+              <p className="text-sm font-medium">Add New User</p>
+              <p className="text-xs text-neutral-500 mt-1">Create a new user account</p>
+            </button>
+            <button className="w-full text-left px-4 py-3 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 transition">
+              <p className="text-sm font-medium">Post a Job</p>
+              <p className="text-xs text-neutral-500 mt-1">Add a new job listing</p>
+            </button>
+            <button className="w-full text-left px-4 py-3 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 transition">
+              <p className="text-sm font-medium">Manage Sessions</p>
+              <p className="text-xs text-neutral-500 mt-1">View and manage all sessions</p>
+            </button>
+            <button className="w-full text-left px-4 py-3 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 transition">
+              <p className="text-sm font-medium">Generate Report</p>
+              <p className="text-xs text-neutral-500 mt-1">Create analytics reports</p>
+            </button>
+          </div>
+        </div>
+      </div>
 
-            <div className="stat-card">
-              <div className="stat-value">{overview.sessions.completed}</div>
-              <div className="stat-label">Sessions Completed</div>
-              <div className="stat-breakdown">
-                {overview.sessions.completionRate} completion rate
-              </div>
-            </div>
-
-            <div className="stat-card">
-              <div className="stat-value">{overview.sessions.pending}</div>
-              <div className="stat-label">Pending Requests</div>
-            </div>
-
-            <div className="stat-card">
-              <div className="stat-value">{overview.sessions.total}</div>
-              <div className="stat-label">Total Sessions</div>
+      {/* System Status */}
+      <div className="mt-6 border border-white/10 rounded-xl p-6 bg-neutral-950">
+        <h2 className="text-lg font-medium mb-4">System Status</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="flex items-center gap-3">
+            <div className="w-3 h-3 rounded-full bg-green-500 animate-pulse" />
+            <div>
+              <p className="text-sm text-neutral-400">Server Status</p>
+              <p className="text-sm font-medium text-green-400">Online</p>
             </div>
           </div>
-
-          {/* Top Alumni */}
-          <div className="section-card">
-            <h2>🏆 Top Performing Alumni</h2>
-            {topAlumni.length === 0 ? (
-              <p>No data yet</p>
-            ) : (
-              <div className="alumni-table">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Name</th>
-                      <th>Role</th>
-                      <th>Company</th>
-                      <th>Sessions</th>
-                      <th>Rating</th>
-                      <th>Impact Score</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {topAlumni.map((alum, idx) => (
-                      <tr key={idx}>
-                        <td>{alum.name}</td>
-                        <td>{alum.currentRole}</td>
-                        <td>{alum.company}</td>
-                        <td>{alum.sessionsCompleted}</td>
-                        <td>{alum.averageRating}</td>
-                        <td>{alum.impactScore}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
+          <div className="flex items-center gap-3">
+            <div className="w-3 h-3 rounded-full bg-green-500 animate-pulse" />
+            <div>
+              <p className="text-sm text-neutral-400">Database</p>
+              <p className="text-sm font-medium text-green-400">Connected</p>
+            </div>
           </div>
-
-          {/* Feedback Summary */}
-          {feedback && feedback.totalFeedbacks > 0 && (
-            <div className="section-card">
-              <h2>📊 Feedback Summary</h2>
-              <div className="feedback-stats">
-                <div className="feedback-item">
-                  <span>Total Feedbacks:</span>
-                  <strong>{feedback.totalFeedbacks}</strong>
-                </div>
-                <div className="feedback-item">
-                  <span>Avg Rating:</span>
-                  <strong>{feedback.averages.rating} / 5</strong>
-                </div>
-                <div className="feedback-item">
-                  <span>Avg Usefulness:</span>
-                  <strong>{feedback.averages.usefulness} / 5</strong>
-                </div>
-                <div className="feedback-item">
-                  <span>Avg Clarity:</span>
-                  <strong>{feedback.averages.clarity} / 5</strong>
-                </div>
-              </div>
-
-              <h3>Rating Distribution</h3>
-              <div className="rating-bars">
-                {feedback.ratingDistribution.map((item) => (
-                  <div key={item.rating} className="rating-bar">
-                    <span className="rating-label">{item.rating} ⭐</span>
-                    <div className="bar-container">
-                      <div
-                        className="bar-fill"
-                        style={{
-                          width: `${(item.count / feedback.totalFeedbacks) * 100}%`
-                        }}
-                      />
-                    </div>
-                    <span className="rating-count">{item.count}</span>
-                  </div>
-                ))}
-              </div>
+          <div className="flex items-center gap-3">
+            <div className="w-3 h-3 rounded-full bg-yellow-500 animate-pulse" />
+            <div>
+              <p className="text-sm text-neutral-400">API Response</p>
+              <p className="text-sm font-medium text-yellow-400">245ms</p>
             </div>
-          )}
-
-          {/* Popular Domains */}
-          {domains && (
-            <div className="section-card">
-              <h2>🔥 Popular Domains</h2>
-              <div className="domains-grid">
-                <div>
-                  <h3>Student Preferences</h3>
-                  <ul className="domains-list">
-                    {domains.studentPreferences.slice(0, 10).map((d, idx) => (
-                      <li key={idx}>
-                        <span>{d.domain}</span>
-                        <span className="domain-count">{d.count}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-                <div>
-                  <h3>Alumni Expertise</h3>
-                  <ul className="domains-list">
-                    {domains.alumniExpertise.slice(0, 10).map((d, idx) => (
-                      <li key={idx}>
-                        <span>{d.domain}</span>
-                        <span className="domain-count">{d.count}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-            </div>
-          )}
-        </>
-      )}
+          </div>
+        </div>
+      </div>
     </div>
   );
-}
+};
 
 export default AdminDashboard;

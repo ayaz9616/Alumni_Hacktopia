@@ -1,10 +1,87 @@
 from typing import Callable
+import json
+import re
+import ast
 import streamlit as st
 
 
 def resume_improvement_section(has_resume: bool, improve_resume_func: Callable, get_improved_resume_func: Callable):
     st.subheader("✨ Resume Improvement Suggestions")
     st.markdown("Get AI-powered suggestions to enhance your resume and make it stand out!")
+
+    def normalize_improvements(raw):
+        def try_parse(text):
+            cleaned = text.strip()
+            if cleaned.startswith("```"):
+                cleaned = cleaned.strip("`")
+                if cleaned.lower().startswith("json"):
+                    cleaned = cleaned[4:].strip()
+
+            if not cleaned.startswith("{"):
+                match = re.search(r"\{[\s\S]*\}", cleaned)
+                if match:
+                    cleaned = match.group(0)
+
+            for _ in range(2):
+                try:
+                    return json.loads(cleaned)
+                except json.JSONDecodeError:
+                    try:
+                        return ast.literal_eval(cleaned)
+                    except (ValueError, SyntaxError):
+                        return None
+            return None
+
+        if isinstance(raw, dict):
+            for key in ["content", "text", "message", "output"]:
+                if isinstance(raw.get(key), str):
+                    raw = raw.get(key)
+                    break
+
+        if isinstance(raw, list) and raw:
+            raw = raw[0]
+
+        if isinstance(raw, str):
+            parsed = try_parse(raw)
+            if parsed is None:
+                return {"Overall Improvements": raw}
+            raw = parsed
+
+            if isinstance(raw, str):
+                parsed = try_parse(raw)
+                if parsed is None:
+                    return {"Overall Improvements": raw}
+                raw = parsed
+
+        if not isinstance(raw, dict):
+            return {"Overall Improvements": str(raw)}
+
+        if any(k in raw for k in ["improved_sections", "suggestions", "overall_improvements"]):
+            normalized = {}
+            improved_sections = raw.get("improved_sections") or {}
+            for section, text in improved_sections.items():
+                normalized[section] = {
+                    "description": text,
+                    "specific": []
+                }
+
+            suggestions = raw.get("suggestions") or []
+            if suggestions:
+                normalized["General Suggestions"] = {
+                    "description": "High-impact suggestions to improve clarity and impact.",
+                    "specific": suggestions
+                }
+
+            overall = raw.get("overall_improvements")
+            if overall:
+                normalized["Overall Improvements"] = {
+                    "description": overall,
+                    "specific": []
+                }
+
+            return normalized
+
+        return raw
 
     if has_resume:
         col1, col2 = st.columns([1, 1])
@@ -57,7 +134,7 @@ def resume_improvement_section(has_resume: bool, improve_resume_func: Callable, 
                 unsafe_allow_html=True,
             )
 
-            improvements = st.session_state['improvement_suggestions']
+            improvements = normalize_improvements(st.session_state['improvement_suggestions'])
 
             total_suggestions = sum(
                 len(details.get('specific', [])) if isinstance(details, dict) else 1

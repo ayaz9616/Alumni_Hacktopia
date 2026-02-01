@@ -41,7 +41,7 @@ app.use(compression()); // Compress responses
 app.use(morgan('dev')); // Logging
 
 // CORS with multiple allowed origins
-const rawOrigins = process.env.CORS_ORIGINS || process.env.FRONTEND_URL || 'http://localhost:3000,http://localhost:5173,http://localhost:8501';
+const rawOrigins = process.env.CORS_ORIGINS || process.env.FRONTEND_URL || 'http://localhost:3000,http://localhost:5173,http://localhost:5174,http://localhost:8501';
 const allowedOrigins = rawOrigins.split(',').map((o) => o.trim());
 const corsOptions: CorsOptions = {
   origin: (origin, callback) => {

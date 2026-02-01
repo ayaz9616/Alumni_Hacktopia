@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { ArrowUp } from "lucide-react";
 import { getSessionRequests, createSessionRequest, voteOnSession, scheduleSession } from "../../services/communityApi";
 
 const CommunityStudentsRequest = () => {
@@ -153,33 +154,51 @@ const CommunityStudentsRequest = () => {
               key={session.id}
               className="border border-white/10 rounded-xl p-6 bg-neutral-950 hover:border-white/20 transition"
             >
-              <div className="flex justify-between items-start mb-4">
-                <div>
-                  <h3 className="text-lg font-medium">{session.topic}</h3>
-                  <p className="text-sm text-neutral-400 mt-1">
-                    {session.description}
-                  </p>
-                  <p className="text-xs text-neutral-500 mt-2">
-                    Proposed by {session.proposedByName}
-                  </p>
+              <div className="flex gap-4">
+                {/* Upvote Section - Left Side */}
+                <div className="flex flex-col items-center gap-1">
+                  <button
+                    onClick={() => handleVote(session.sessionId)}
+                    disabled={session.status !== "open"}
+                    className={`rounded-lg border px-3 py-2 transition-all flex flex-col items-center gap-1 ${
+                      session.votesList?.includes(userId) 
+                        ? "bg-green-500/20 text-green-400 border-green-500/50" 
+                        : "border-white/10 text-neutral-300 hover:bg-white/5 hover:border-white/20"
+                    } ${session.status !== "open" ? "opacity-50 cursor-not-allowed" : ""}`}
+                  >
+                    <ArrowUp className="w-5 h-5" />
+                    <span className="font-bold text-base">{session.votes || 0}</span>
+                  </button>
+                  <span className="text-[10px] text-neutral-500 text-center">
+                    {session.votes === 1 ? "vote" : "votes"}
+                  </span>
                 </div>
 
-                <span
-                  className={`text-xs px-3 py-1 rounded-full border ${
-                    session.status === "open"
-                      ? "border-yellow-500/30 text-yellow-400 bg-yellow-500/20"
-                      : "border-green-500/30 text-green-400 bg-green-500/20"
-                  }`}
-                >
-                  {session.status === "open"
-                    ? "Open for Voting"
-                    : "Scheduled"}
-                </span>
-              </div>
+                {/* Content Section - Right Side */}
+                <div className="flex-1">
+                  <div className="flex justify-between items-start mb-4">
+                    <div className="flex-1">
+                      <h3 className="text-lg font-medium">{session.topic}</h3>
+                      <p className="text-sm text-neutral-400 mt-1">
+                        {session.description}
+                      </p>
+                      <p className="text-xs text-neutral-500 mt-2">
+                        Proposed by {session.proposedByName}
+                      </p>
+                    </div>
 
-              <p className="text-sm text-neutral-400 mb-4">
-                👍 {session.votes} students interested
-              </p>
+                    <span
+                      className={`text-xs px-3 py-1 rounded-full border ml-4 whitespace-nowrap ${
+                        session.status === "open"
+                          ? "border-yellow-500/30 text-yellow-400 bg-yellow-500/20"
+                          : "border-green-500/30 text-green-400 bg-green-500/20"
+                      }`}
+                    >
+                      {session.status === "open"
+                        ? "Open for Voting"
+                        : "Scheduled"}
+                    </span>
+                  </div>
 
               {session.status === "scheduled" && session.scheduledDetails && (
                 <div className="bg-black/40 rounded-lg p-4 mb-4">
@@ -208,27 +227,18 @@ const CommunityStudentsRequest = () => {
                 </div>
               )}
 
-              {session.status === "open" && (
-                <div className="flex gap-3 flex-wrap">
+              {session.status === "open" && userRole === "alumni" && (
+                <div className="flex gap-3">
                   <button
-                    onClick={() => handleVote(session.sessionId)}
-                    className={`rounded-full border border-white/10 px-4 py-1.5 text-sm hover:bg-white/5 transition ${
-                      session.votesList?.includes(userId) ? "bg-green-500/20 text-green-400" : ""
-                    }`}
+                    onClick={() => openScheduleModal(session)}
+                    className="rounded-full bg-green-500/20 text-green-400 px-4 py-1.5 text-sm hover:bg-green-500/30 border border-green-500/30 transition"
                   >
-                    {session.votesList?.includes(userId) ? "Voted" : "Upvote"}
+                    Host This Session
                   </button>
-
-                  {userRole === "alumni" && (
-                    <button
-                      onClick={() => openScheduleModal(session)}
-                      className="rounded-full bg-green-500/20 text-green-400 px-4 py-1.5 text-sm hover:bg-green-500/30 transition"
-                    >
-                      Take Session (Alumni)
-                    </button>
-                  )}
                 </div>
               )}
+                </div>
+              </div>
             </div>
           ))}
         </div>

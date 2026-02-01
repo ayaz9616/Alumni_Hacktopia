@@ -109,6 +109,10 @@ export const parseResume = async (formData) => {
 
 // ==================== USER MANAGEMENT ====================
 
+export const loginUser = async (email, password) => {
+  return api.post('/api/mentorship/user/login', { email, password });
+};
+
 export const registerUser = async (userData) => {
   return api.post('/api/mentorship/user/register', userData);
 };

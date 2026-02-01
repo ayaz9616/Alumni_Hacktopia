@@ -1,6 +1,118 @@
 import { useState, useEffect } from 'react';
 import { getUserProfile } from '../lib/authManager';
 import { getAlumniProfile, updateAlumniProfile } from '../services/mentorshipApi';
+import { Calendar, Clock, CheckCircle, Edit } from 'lucide-react';
+import toast from 'react-hot-toast';
+
+// Calendar component for date range selection
+const CalendarComponent = ({ startDate, endDate, onDateSelect }) => {
+  const [currentMonth, setCurrentMonth] = useState(new Date());
+
+  const getDaysInMonth = (date) => {
+    return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+  };
+
+  const getFirstDayOfMonth = (date) => {
+    return new Date(date.getFullYear(), date.getMonth(), 1).getDay();
+  };
+
+  const days = [];
+  const daysInMonth = getDaysInMonth(currentMonth);
+  const firstDay = getFirstDayOfMonth(currentMonth);
+
+  for (let i = 0; i < firstDay; i++) {
+    days.push(null);
+  }
+  for (let i = 1; i <= daysInMonth; i++) {
+    days.push(i);
+  }
+
+  const isDateInRange = (day) => {
+    if (!startDate || !endDate) return false;
+    const date = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day);
+    return date >= startDate && date <= endDate;
+  };
+
+  const isStartDate = (day) => {
+    if (!startDate) return false;
+    return (
+      day === startDate.getDate() &&
+      currentMonth.getMonth() === startDate.getMonth() &&
+      currentMonth.getFullYear() === startDate.getFullYear()
+    );
+  };
+
+  const isEndDate = (day) => {
+    if (!endDate) return false;
+    return (
+      day === endDate.getDate() &&
+      currentMonth.getMonth() === endDate.getMonth() &&
+      currentMonth.getFullYear() === endDate.getFullYear()
+    );
+  };
+
+  const handleDayClick = (day) => {
+    if (!startDate || (startDate && endDate)) {
+      onDateSelect(new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day), 'start');
+    } else {
+      const selectedDate = new Date(currentMonth.getFullYear(), currentMonth.getMonth(), day);
+      if (selectedDate >= startDate) {
+        onDateSelect(selectedDate, 'end');
+      }
+    }
+  };
+
+  return (
+    <div className="bg-neutral-900 rounded-xl p-4 border border-white/10">
+      <div className="flex justify-between items-center mb-4">
+        <button
+          onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - 1))}
+          className="text-white hover:bg-neutral-800 px-2 py-1 rounded"
+        >
+          ←
+        </button>
+        <h3 className="text-white font-medium">
+          {currentMonth.toLocaleDateString("en-US", { month: "long", year: "numeric" })}
+        </h3>
+        <button
+          onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1))}
+          className="text-white hover:bg-neutral-800 px-2 py-1 rounded"
+        >
+          →
+        </button>
+      </div>
+
+      <div className="grid grid-cols-7 gap-2 mb-4">
+        {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d) => (
+          <div key={d} className="text-center text-xs text-neutral-400 font-medium">
+            {d}
+          </div>
+        ))}
+      </div>
+
+      <div className="grid grid-cols-7 gap-1">
+        {days.map((day, idx) => (
+          <button
+            key={idx}
+            onClick={() => day && handleDayClick(day)}
+            disabled={!day}
+            className={`py-2 text-sm rounded ${
+              !day
+                ? "text-neutral-700"
+                : isStartDate(day) || isEndDate(day)
+                ? "bg-green-500 text-black font-medium"
+                : isDateInRange(day)
+                ? "bg-green-500/30 text-white"
+                : "text-white hover:bg-white/10"
+            }`}
+          >
+            {day}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+};
 
 const inputClass =
   "w-full bg-black text-white caret-green-400 " +
@@ -15,6 +127,13 @@ function AlumniProfile() {
   const [editing, setEditing] = useState(false);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [showAvailabilityModal, setShowAvailabilityModal] = useState(false);
+  const [availability, setAvailability] = useState({
+    startDate: null,
+    endDate: null,
+    startTime: "09:00",
+    endTime: "17:00",
+  });
   
   const [formData, setFormData] = useState({
     name: '',
@@ -72,6 +191,15 @@ function AlumniProfile() {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
+  const ensureHttpsPrefix = (url) => {
+    if (!url) return '';
+    url = url.trim();
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+      return `https://${url}`;
+    }
+    return url;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSaving(true);
@@ -80,6 +208,9 @@ function AlumniProfile() {
       const user = getUserProfile();
       const updateData = {
         ...formData,
+        linkedIn: ensureHttpsPrefix(formData.linkedIn),
+        github: ensureHttpsPrefix(formData.github),
+        portfolioUrl: ensureHttpsPrefix(formData.portfolioUrl),
         domainsOfExpertise: formData.domainsOfExpertise.split(',').map(d => d.trim()).filter(d => d)
       };
       
@@ -92,6 +223,25 @@ function AlumniProfile() {
     } finally {
       setSaving(false);
     }
+  };
+
+  const handleDateSelect = (date, type) => {
+    if (type === 'start') {
+      setAvailability((prev) => ({ ...prev, startDate: date, endDate: null }));
+    } else {
+      if (date >= availability.startDate) {
+        setAvailability((prev) => ({ ...prev, endDate: date }));
+      }
+    }
+  };
+
+  const saveAvailability = () => {
+    if (!availability.startDate || !availability.endDate) {
+      toast.error("Please select both start and end dates");
+      return;
+    }
+    toast.success("Availability updated successfully!");
+    setShowAvailabilityModal(false);
   };
 
   if (loading) {
@@ -380,7 +530,7 @@ function AlumniProfile() {
                   <div>
                     <p className="text-xs text-neutral-500 mb-1">LinkedIn</p>
                     <a
-                      href={profile.linkedIn}
+                      href={ensureHttpsPrefix(profile.linkedIn)}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-green-400 hover:text-green-300 transition"
@@ -393,7 +543,7 @@ function AlumniProfile() {
                   <div>
                     <p className="text-xs text-neutral-500 mb-1">GitHub</p>
                     <a
-                      href={profile.github}
+                      href={ensureHttpsPrefix(profile.github)}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-green-400 hover:text-green-300 transition"
@@ -406,7 +556,7 @@ function AlumniProfile() {
                   <div>
                     <p className="text-xs text-neutral-500 mb-1">Portfolio</p>
                     <a
-                      href={profile.portfolioUrl}
+                      href={ensureHttpsPrefix(profile.portfolioUrl)}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-green-400 hover:text-green-300 transition"
@@ -420,9 +570,143 @@ function AlumniProfile() {
                 )}
               </div>
             </div>
+
+            {/* Mentorship Availability Section */}
+            <div className="border border-white/10 rounded-xl p-6 bg-neutral-950">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-lg font-medium">Mentorship Availability</h2>
+                <button
+                  onClick={() => setShowAvailabilityModal(true)}
+                  className="flex items-center gap-2 text-sm text-green-400 hover:text-green-300 transition"
+                >
+                  <Edit size={16} />
+                  {availability.startDate && availability.endDate ? 'Edit' : 'Set Availability'}
+                </button>
+              </div>
+              
+              {availability.startDate && availability.endDate ? (
+                <div className="space-y-3">
+                  <div className="flex items-center gap-3 text-sm text-neutral-300">
+                    <Calendar size={16} className="text-green-500" />
+                    <span>
+                      {availability.startDate.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                      {" - "}
+                      {availability.endDate.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-3 text-sm text-neutral-300">
+                    <Clock size={16} className="text-green-500" />
+                    <span>{availability.startTime} - {availability.endTime}</span>
+                  </div>
+                  <div className="mt-4 p-3 bg-green-500/10 border border-green-500/20 rounded-lg">
+                    <div className="flex items-center gap-2">
+                      <CheckCircle size={18} className="text-green-500" />
+                      <span className="text-sm text-green-400">Available for 1:1 mentorship sessions</span>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-neutral-500 text-sm">
+                  <p className="mb-3">Set your availability to let students know when you're free for mentorship sessions.</p>
+                  <button
+                    onClick={() => setShowAvailabilityModal(true)}
+                    className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-green-500 hover:bg-green-400 text-black font-medium transition text-sm"
+                  >
+                    <Calendar size={16} />
+                    Set Availability
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         )}
       </div>
+
+      {/* Update Availability Modal */}
+      {showAvailabilityModal && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-neutral-950 border border-white/10 rounded-2xl p-8 max-w-2xl w-full max-h-[95vh] overflow-y-auto">
+            <h2 className="text-2xl font-medium text-white mb-6">Update Availability</h2>
+            <div className="space-y-6">
+              {/* Calendar Section */}
+              <div>
+                <label className="block text-sm font-medium text-white mb-4">
+                  {!availability.startDate ? "Select Start Date" : !availability.endDate ? "Select End Date" : "Date Range Selected"}
+                </label>
+                <CalendarComponent
+                  startDate={availability.startDate}
+                  endDate={availability.endDate}
+                  onDateSelect={handleDateSelect}
+                />
+
+                {/* Selected Dates Display */}
+                {(availability.startDate || availability.endDate) && (
+                  <div className="mt-4 p-4 bg-black border border-white/10 rounded-lg">
+                    <p className="text-sm text-neutral-300">
+                      {availability.startDate && (
+                        <>
+                          <span className="text-green-500">Start:</span> {availability.startDate.toDateString()}
+                        </>
+                      )}
+                    </p>
+                    {availability.endDate && (
+                      <p className="text-sm text-neutral-300 mt-2">
+                        <span className="text-green-500">End:</span> {availability.endDate.toDateString()}
+                      </p>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* Time Selection */}
+              {availability.startDate && (
+                <div className="border-t border-white/10 pt-6">
+                  <h3 className="text-sm font-medium text-white mb-4">Time Slot</h3>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs text-neutral-400 mb-2">Start Time</label>
+                      <input
+                        type="time"
+                        value={availability.startTime}
+                        onChange={(e) =>
+                          setAvailability((prev) => ({ ...prev, startTime: e.target.value }))
+                        }
+                        className="w-full bg-black border border-white/10 rounded-lg px-4 py-2 text-white text-sm focus:outline-none focus:border-green-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-neutral-400 mb-2">End Time</label>
+                      <input
+                        type="time"
+                        value={availability.endTime}
+                        onChange={(e) =>
+                          setAvailability((prev) => ({ ...prev, endTime: e.target.value }))
+                        }
+                        className="w-full bg-black border border-white/10 rounded-lg px-4 py-2 text-white text-sm focus:outline-none focus:border-green-500"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              <div className="flex gap-3 pt-4">
+                <button
+                  onClick={saveAvailability}
+                  className="flex-1 bg-green-500 hover:bg-green-400 text-black rounded-full py-2.5 font-medium transition"
+                >
+                  Save Availability
+                </button>
+                <button
+                  onClick={() => setShowAvailabilityModal(false)}
+                  className="flex-1 border border-white/10 text-white rounded-full py-2.5 hover:bg-white/5 transition"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -74,6 +74,15 @@ function StudentProfile() {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
+  const ensureHttpsPrefix = (url) => {
+    if (!url) return '';
+    url = url.trim();
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+      return `https://${url}`;
+    }
+    return url;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSaving(true);
@@ -82,6 +91,9 @@ function StudentProfile() {
       const user = getUserProfile();
       const updateData = {
         ...formData,
+        linkedIn: ensureHttpsPrefix(formData.linkedIn),
+        github: ensureHttpsPrefix(formData.github),
+        portfolioUrl: ensureHttpsPrefix(formData.portfolioUrl),
         skills: formData.skills.split(',').map(s => s.trim()).filter(s => s),
         interests: formData.interests.split(',').map(i => i.trim()).filter(i => i),
         cgpa: formData.cgpa ? parseFloat(formData.cgpa) : undefined
@@ -388,7 +400,7 @@ function StudentProfile() {
                   <div>
                     <p className="text-xs text-neutral-500 mb-1">LinkedIn</p>
                     <a
-                      href={profile.linkedIn}
+                      href={ensureHttpsPrefix(profile.linkedIn)}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-green-400 hover:text-green-300 transition"
@@ -401,7 +413,7 @@ function StudentProfile() {
                   <div>
                     <p className="text-xs text-neutral-500 mb-1">GitHub</p>
                     <a
-                      href={profile.github}
+                      href={ensureHttpsPrefix(profile.github)}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-green-400 hover:text-green-300 transition"
@@ -414,7 +426,7 @@ function StudentProfile() {
                   <div>
                     <p className="text-xs text-neutral-500 mb-1">Portfolio</p>
                     <a
-                      href={profile.portfolioUrl}
+                      href={ensureHttpsPrefix(profile.portfolioUrl)}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-green-400 hover:text-green-300 transition"

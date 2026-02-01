@@ -20,7 +20,7 @@ export default function Hero() {
   return (
     <section
       id="hero"
-      className="relative mt-4 md:mt-6 h-[92vh] md:h-[93vh] overflow-hidden rounded-xl md:rounded-2xl text-white mx-4"
+      className="relative mt-5 h-[92vh] md:h-[93vh] overflow-hidden rounded-xl md:rounded-2xl text-white mx-4"
     >
       {/* Background */}
       <div
@@ -36,16 +36,16 @@ export default function Hero() {
       <div className="relative z-10 grid h-full grid-rows-[1fr_auto_1fr] px-6 sm:px-8 md:px-20">
         {/* CENTER CONTENT */}
         <main className="row-start-2 flex flex-col items-center text-center">
-          <p className="mb-3 text-xs uppercase tracking-widest opacity-80">
+          <p className="mb-3 text-xs uppercase tracking-widest opacity-80 font-dm-sans">
             Get started
           </p>
 
-          <h1 className="max-w-4xl text-3xl sm:text-4xl md:text-6xl font-semibold leading-tight">
+          <h1 className="max-w-4xl text-3xl sm:text-4xl md:text-6xl font-bold font-outfit">
             Transforming Alumni Student <br className="hidden sm:block" />
             Mentorship with <span className="font-bold">AI</span>
           </h1>
 
-          <p className="mt-5 max-w-xl text-sm sm:text-base md:text-lg opacity-85">
+          <p className="mt-5 max-w-xl text-sm sm:text-base md:text-lg opacity-85 ">
             A scalable mentorship system that leverages intelligent matching,
             scheduling, and feedback to deliver measurable, outcome-driven
             guidance.
@@ -55,7 +55,7 @@ export default function Hero() {
           <div className="mt-8">
             <Link
               to="/auth"
-              className="inline-flex items-center justify-center rounded-full bg-green-500 px-7 py-3 text-sm sm:text-base font-medium text-black transition-all duration-300 hover:bg-green-400"
+              className="inline-flex items-center justify-center rounded-full bg-green-500 px-7 py-3 text-sm sm:text-base font-medium text-black transition-all duration-300 hover:bg-green-400 font-outfit"
             >
               Sign up, it's free!
             </Link>

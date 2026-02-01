@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { getUserProfile, setUserProfile, generateUserId } from '../lib/authManager';
-import { registerUser } from '../services/mentorshipApi';
+import { registerUser, loginUser } from '../services/mentorshipApi';
 
 function Auth({ onAuthSuccess }) {
   const navigate = useNavigate();
@@ -30,17 +30,25 @@ function Auth({ onAuthSuccess }) {
         throw new Error('Please enter a valid email');
       }
 
-      // TODO: Implement actual login API call
-      // For now, simulate login by checking if user exists in localStorage
-      const storedProfile = getUserProfile();
-      if (storedProfile && storedProfile.email === email) {
-        onAuthSuccess(storedProfile);
+      // Call login API
+      const response = await loginUser(email, password);
+      
+      if (response.success && response.data) {
+        // Save user profile to localStorage
+        setUserProfile({
+          userId: response.data.userId,
+          role: response.data.role,
+          name: response.data.name,
+          email: response.data.email
+        });
+
+        onAuthSuccess(response.data);
       } else {
-        throw new Error('Invalid credentials. Please sign up first.');
+        throw new Error(response.error || 'Invalid email or password');
       }
     } catch (err) {
       console.error('Login error:', err);
-      setError(err.message || 'Login failed');
+      setError(err.message || 'Login failed. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -68,12 +76,13 @@ function Auth({ onAuthSuccess }) {
       // Generate new userId
       const userId = generateUserId();
 
-      // Register user
+      // Register user with password
       const response = await registerUser({
         userId,
         email,
         name,
         role,
+        password,
         profilePicture: ''
       });
 

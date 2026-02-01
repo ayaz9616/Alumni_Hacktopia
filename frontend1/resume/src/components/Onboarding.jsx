@@ -95,9 +95,9 @@ function Onboarding() {
           company: '',
           totalExperience: parsed["Total year of experience"] || '',
           skills: Array.isArray(parsed["skill keyword"]) ? parsed["skill keyword"].join(', ') : '',
-          linkedIn: parsed.LinkedIn || '',
-          github: parsed.github || '',
-          portfolioUrl: parsed["portfolio URL"] || '',
+          linkedIn: ensureHttpsPrefix(parsed.LinkedIn) || '',
+          github: ensureHttpsPrefix(parsed.github) || '',
+          portfolioUrl: ensureHttpsPrefix(parsed["portfolio URL"]) || '',
           careerGoals: parsed.Goal || '',
           profileSummary: parsed["Profile Summary"] || ''
         });
@@ -116,6 +116,15 @@ function Onboarding() {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const ensureHttpsPrefix = (url) => {
+    if (!url) return '';
+    url = url.trim();
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+      return `https://${url}`;
+    }
+    return url;
   };
 
   const handleSubmit = async (e) => {
@@ -160,9 +169,9 @@ function Onboarding() {
         cgpa: formData.cgpa,
         domain: formData.domain,
         skills: formData.skills.split(',').map(s => s.trim()).filter(s => s),
-        linkedIn: formData.linkedIn,
-        github: formData.github,
-        portfolioUrl: formData.portfolioUrl,
+        linkedIn: ensureHttpsPrefix(formData.linkedIn),
+        github: ensureHttpsPrefix(formData.github),
+        portfolioUrl: ensureHttpsPrefix(formData.portfolioUrl),
         profileSummary: formData.profileSummary
       };
 
@@ -197,7 +206,7 @@ function Onboarding() {
   };
 
   return (
-    <div className="min-h-screen bg-black text-white flex items-center justify-center p-6">
+    <div className="min-h-screen bg-black text-white flex items-center justify-center p-6 pt-28">
       <div className="w-full max-w-4xl">
         {/* Header */}
         <div className="text-center mb-8">

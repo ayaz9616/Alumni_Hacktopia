@@ -398,6 +398,13 @@ router.post('/events/create', async (req: Request, res: Response) => {
       });
     }
 
+    if (hostRole !== 'alumni') {
+      return res.status(403).json({
+        success: false,
+        message: 'Only alumni can create events. Students should submit requests.'
+      });
+    }
+
     const event = new Event({
       title,
       description,

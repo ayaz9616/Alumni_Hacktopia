@@ -1,104 +1,112 @@
-import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from "framer-motion";
+import { useState } from "react";
 
 const faqs = [
   {
-    question: 'How do I connect with alumni?',
-    answer: 'You can browse alumni profiles, filter by industry or graduation year, and send connection requests directly through the platform. Alumni can also mentor students through scheduled sessions.'
+    id: "01",
+    question: "How does mentor matching work?",
+    answer:
+      "The platform uses structured profile data, stated goals, domains of interest, and past engagement patterns to recommend high-potential mentor–mentee matches.",
   },
   {
-    question: 'Can I post job opportunities?',
-    answer: 'Yes! Alumni can post job openings, internships, and referral opportunities. Our AI-powered matching system helps connect the right students to relevant opportunities based on skills and interests.'
+    id: "02",
+    question: "Can students schedule sessions with alumni?",
+    answer:
+      "Yes. Students can request one-on-one or group mentorship sessions based on alumni availability using time-slot based scheduling with confirmations and reminders.",
   },
   {
-    question: 'How does the mentorship program work?',
-    answer: 'Students can browse mentor profiles and request mentorship sessions. Alumni set their availability through the calendar system, and sessions can be scheduled directly through the platform with automated reminders.'
+    id: "03",
+    question: "Is mentorship limited to a specific domain?",
+    answer:
+      "No. Mentorship spans technical, design, analytics, research, and career guidance domains depending on alumni expertise and preferences.",
   },
   {
-    question: 'Is my data secure?',
-    answer: 'Absolutely. We use industry-standard encryption, secure authentication, and follow best practices for data protection. Your personal information is never shared without your explicit consent.'
+    id: "04",
+    question: "How is mentorship quality evaluated?",
+    answer:
+      "After each session, structured feedback is collected from both participants. This feedback is used to improve match quality and generate institutional insights.",
   },
   {
-    question: 'How can I get started?',
-    answer: 'Simply sign up with your institutional email, complete your profile, and start exploring. Students can search for jobs and mentors, while alumni can post opportunities and offer mentorship.'
-  }
+    id: "05",
+    question: "Who can access the admin dashboard?",
+    answer:
+      "Authorized faculty members or institute coordinators can access the admin dashboard to monitor participation, engagement trends, and mentorship outcomes.",
+  },
 ];
 
-function FAQ() {
+export default function FAQ() {
   const [openId, setOpenId] = useState(null);
 
-  const toggleFAQ = (id) => {
-    setOpenId(openId === id ? null : id);
-  };
-
   return (
-    <section className="py-20 px-6 bg-black">
-      <div className="max-w-4xl mx-auto">
-        <div className="text-center mb-12">
-          <h2 className="text-4xl md:text-5xl font-medium text-white mb-4">
-            Frequently Asked Questions
-          </h2>
-          <p className="text-neutral-400">
-            Everything you need to know about our platform
+    <section className="bg-black py-32 px-6">
+      <div className="max-w-6xl mx-auto">
+        {/* Header */}
+        <div className="mb-20 text-center">
+          <p className="mb-4 text-[10px] uppercase tracking-[0.4em] text-neutral-500 font-bold">
+            Support
           </p>
+          <h2 className="text-5xl md:text-7xl font-medium text-white tracking-tighter">
+            Frequently asked{" "}
+            <span className="text-neutral-500 italic">questions</span>
+          </h2>
         </div>
 
-        <div className="space-y-4">
-          {faqs.map((faq, idx) => (
-            <div
-              key={idx}
-              className="border border-white/10 rounded-xl bg-neutral-950 overflow-hidden"
-            >
-              <button
-                onClick={() => toggleFAQ(idx)}
-                className="w-full flex items-start justify-between p-6 text-left hover:bg-white/5 transition"
-              >
-                <div className="flex-1">
-                  <div className="flex items-center gap-4">
-                    <span className="text-neutral-500 text-sm font-mono">
-                      {String(idx + 1).padStart(2, '0')}
-                    </span>
-                    <h3 className="text-lg font-medium text-white">{faq.question}</h3>
-                  </div>
-                </div>
-                <motion.svg
-                  animate={{ rotate: openId === idx ? 180 : 0 }}
-                  transition={{ duration: 0.2 }}
-                  className="w-5 h-5 text-neutral-500 flex-shrink-0 ml-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M19 9l-7 7-7-7"
-                  />
-                </motion.svg>
-              </button>
+        {/* FAQ List */}
+        <div className="divide-y divide-white/10 border-t border-white/10">
+          {faqs.map((faq) => {
+            const isOpen = openId === faq.id;
 
-              <AnimatePresence>
-                {openId === idx && (
-                  <motion.div
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: 'auto', opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.3 }}
-                    className="overflow-hidden"
+            return (
+              <div key={faq.id} className="py-8">
+                {/* Question */}
+                <button
+                  onClick={() =>
+                    setOpenId(isOpen ? null : faq.id)
+                  }
+                  className="
+                    w-full flex items-center justify-between
+                    text-left focus:outline-none
+                  "
+                >
+                  <div className="flex items-center gap-8">
+                    <span className="text-xs text-neutral-600">
+                      {faq.id}
+                    </span>
+                    <h3 className="text-2xl md:text-3xl font-light text-neutral-300">
+                      {faq.question}
+                    </h3>
+                  </div>
+
+                  <span
+                    className={`text-xl text-neutral-500 transition-transform duration-300 ${
+                      isOpen ? "rotate-45" : ""
+                    }`}
                   >
-                    <div className="px-6 pb-6 pl-20">
-                      <p className="text-neutral-400 leading-relaxed">{faq.answer}</p>
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
-          ))}
+                    +
+                  </span>
+                </button>
+
+                {/* Answer */}
+                <AnimatePresence initial={false}>
+                  {isOpen && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: "auto", opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.3, ease: "easeOut" }}
+                      className="overflow-hidden"
+                    >
+                      <p className="mt-6 ml-[3.25rem] max-w-3xl text-sm leading-relaxed text-neutral-400">
+                        {faq.answer}
+                      </p>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            );
+          })}
         </div>
       </div>
     </section>
   );
 }
-
-export default FAQ;

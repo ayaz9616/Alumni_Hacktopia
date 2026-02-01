@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { Bell, BellOff, MessageCircle, Send } from "lucide-react";
 import toast from "react-hot-toast";
-import { getUpcomingEvents, joinEvent, createEvent, addEventComment } from "../../services/communityApi";
+import { useNavigate } from "react-router-dom";
+import { getUpcomingEvents, joinEvent, createEvent, addEventComment, createSessionRequest } from "../../services/communityApi";
 
 const CommunityUpcomingEvents = () => {
+  const navigate = useNavigate();
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -151,9 +153,13 @@ const CommunityUpcomingEvents = () => {
     }
   };
 
-  const handleJoinEvent = async (eventId) => {
+  const handleJoinEvent = async (event) => {
+    if (event.meetLink) {
+      window.open(event.meetLink, "_blank");
+      return;
+    }
     try {
-      await joinEvent(eventId);
+      await joinEvent(event.eventId);
       loadEvents();
     } catch (error) {
       console.error("Error joining event:", error);
@@ -162,13 +168,27 @@ const CommunityUpcomingEvents = () => {
   };
 
   const handleCreateEvent = async () => {
-    if (!eventForm.title || !eventForm.description || !eventForm.date || !eventForm.time || !eventForm.location) {
+    if (!eventForm.title || !eventForm.description) {
+      alert("Please fill in title and description");
+      return;
+    }
+
+    if (userRole === "alumni" && (!eventForm.date || !eventForm.time || !eventForm.location)) {
       alert("Please fill in all required fields");
       return;
     }
 
     try {
       setCreating(true);
+
+      if (userRole === "student") {
+        await createSessionRequest(eventForm.title, eventForm.description);
+        toast.success("Request submitted to Student Requests");
+        setShowCreateModal(false);
+        navigate("/community/students-request");
+        return;
+      }
+
       await createEvent(eventForm);
       setEventForm({
         title: "",
@@ -207,18 +227,18 @@ const CommunityUpcomingEvents = () => {
           <p className="text-xs uppercase tracking-[0.3em] text-neutral-500 mb-3">
             Community
           </p>
-          <h1 className="text-3xl font-medium">Upcoming Events</h1>
+          <h1 className="text-3xl font-medium">Upcoming Sessions</h1>
           <p className="text-sm text-neutral-400 mt-2">
-            Discover and join events hosted by the community
+            Discover and join sessions hosted by the community
           </p>
         </div>
         
-        {userRole === "alumni" && (
+        {(userRole === "alumni" || userRole === "student") && (
           <button
             onClick={() => setShowCreateModal(true)}
             className="rounded-full bg-green-500 px-6 py-2.5 text-sm font-medium text-black hover:bg-green-400 active:scale-[0.97] transition"
           >
-            Create Event
+            {userRole === "student" ? "Request Session" : "Create Session"}
           </button>
         )}
       </div>
@@ -226,7 +246,7 @@ const CommunityUpcomingEvents = () => {
       {/* Events Grid */}
       {events.length === 0 ? (
         <div className="text-center py-12 text-neutral-400">
-          <p>No upcoming events. Check back soon!</p>
+          <p>No upcoming sessions. Check back soon!</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -262,21 +282,11 @@ const CommunityUpcomingEvents = () => {
               </p>
 
               {/* Meet Link */}
-              {event.meetLink && (
-                <a
-                  href={event.meetLink}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-block mb-4 text-sm text-green-400 hover:underline"
-                >
-                  Join Meeting →
-                </a>
-              )}
-
+              
               {/* Actions */}
               <div className="flex gap-3">
                 <button
-                  onClick={() => handleJoinEvent(event.eventId)}
+                  onClick={() => handleJoinEvent(event)}
                   className={`flex-1 rounded-full py-2 text-sm font-medium transition ${
                     event.attendeesList?.includes(userId)
                       ? "bg-green-500/20 text-green-400 hover:bg-green-500/30"
@@ -389,58 +399,69 @@ const CommunityUpcomingEvents = () => {
       {showCreateModal && (
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
           <div className="bg-neutral-950 border border-white/10 rounded-2xl p-8 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
-            <h2 className="text-2xl font-medium mb-6">Create Event</h2>
+            <h2 className="text-2xl font-medium mb-2">
+              {userRole === "student" ? "Request a Session" : "Create Session"}
+            </h2>
+            <p className="text-sm text-neutral-500 mb-6">
+              {userRole === "student"
+                ? "Your request will appear in Student Requests for alumni to host."
+                : "Create a community session that appears in Upcoming Sessions."}
+            </p>
 
             <div className="space-y-4">
               <input
                 type="text"
-                placeholder="Event Title"
+                placeholder="Session Title"
                 value={eventForm.title}
                 onChange={(e) => setEventForm({ ...eventForm, title: e.target.value })}
                 className="w-full bg-black border border-white/10 rounded-lg px-4 py-2 text-sm text-white placeholder:text-neutral-500 focus:outline-none focus:border-green-500"
               />
 
               <textarea
-                placeholder="Event Description"
+                placeholder="Session Description"
                 value={eventForm.description}
                 onChange={(e) => setEventForm({ ...eventForm, description: e.target.value })}
                 className="w-full bg-black border border-white/10 rounded-lg px-4 py-2 text-sm text-white placeholder:text-neutral-500 h-32 resize-none focus:outline-none focus:border-green-500"
               />
 
-              <input
-                type="date"
-                value={eventForm.date}
-                onChange={(e) => setEventForm({ ...eventForm, date: e.target.value })}
-                className="w-full bg-black border border-white/10 rounded-lg px-4 py-2 text-sm text-white focus:outline-none focus:border-green-500"
-              />
+              {userRole === "alumni" && (
+                <>
+                  <input
+                    type="date"
+                    value={eventForm.date}
+                    onChange={(e) => setEventForm({ ...eventForm, date: e.target.value })}
+                    className="w-full bg-black border border-white/10 rounded-lg px-4 py-2 text-sm text-white focus:outline-none focus:border-green-500"
+                  />
 
-              <input
-                type="time"
-                value={eventForm.time}
-                onChange={(e) => setEventForm({ ...eventForm, time: e.target.value })}
-                className="w-full bg-black border border-white/10 rounded-lg px-4 py-2 text-sm text-white focus:outline-none focus:border-green-500"
-              />
+                  <input
+                    type="time"
+                    value={eventForm.time}
+                    onChange={(e) => setEventForm({ ...eventForm, time: e.target.value })}
+                    className="w-full bg-black border border-white/10 rounded-lg px-4 py-2 text-sm text-white focus:outline-none focus:border-green-500"
+                  />
 
-              <input
-                placeholder="Duration (e.g., 2 hours)"
-                value={eventForm.duration}
-                onChange={(e) => setEventForm({ ...eventForm, duration: e.target.value })}
-                className="w-full bg-black border border-white/10 rounded-lg px-4 py-2 text-sm text-white placeholder:text-neutral-500 focus:outline-none focus:border-green-500"
-              />
+                  <input
+                    placeholder="Duration (e.g., 2 hours)"
+                    value={eventForm.duration}
+                    onChange={(e) => setEventForm({ ...eventForm, duration: e.target.value })}
+                    className="w-full bg-black border border-white/10 rounded-lg px-4 py-2 text-sm text-white placeholder:text-neutral-500 focus:outline-none focus:border-green-500"
+                  />
 
-              <input
-                placeholder="Location"
-                value={eventForm.location}
-                onChange={(e) => setEventForm({ ...eventForm, location: e.target.value })}
-                className="w-full bg-black border border-white/10 rounded-lg px-4 py-2 text-sm text-white placeholder:text-neutral-500 focus:outline-none focus:border-green-500"
-              />
+                  <input
+                    placeholder="Location"
+                    value={eventForm.location}
+                    onChange={(e) => setEventForm({ ...eventForm, location: e.target.value })}
+                    className="w-full bg-black border border-white/10 rounded-lg px-4 py-2 text-sm text-white placeholder:text-neutral-500 focus:outline-none focus:border-green-500"
+                  />
 
-              <input
-                placeholder="Meeting Link (optional)"
-                value={eventForm.meetLink}
-                onChange={(e) => setEventForm({ ...eventForm, meetLink: e.target.value })}
-                className="w-full bg-black border border-white/10 rounded-lg px-4 py-2 text-sm text-white placeholder:text-neutral-500 focus:outline-none focus:border-green-500"
-              />
+                  <input
+                    placeholder="Meeting Link (optional)"
+                    value={eventForm.meetLink}
+                    onChange={(e) => setEventForm({ ...eventForm, meetLink: e.target.value })}
+                    className="w-full bg-black border border-white/10 rounded-lg px-4 py-2 text-sm text-white placeholder:text-neutral-500 focus:outline-none focus:border-green-500"
+                  />
+                </>
+              )}
 
               <div className="flex gap-3 pt-4">
                 <button
@@ -448,7 +469,7 @@ const CommunityUpcomingEvents = () => {
                   disabled={creating}
                   className="flex-1 rounded-full bg-green-500 py-2 text-black font-medium hover:bg-green-400 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {creating ? "Creating..." : "Create Event"}
+                  {creating ? "Submitting..." : (userRole === "student" ? "Submit Request" : "Create Session")}
                 </button>
                 <button
                   onClick={() => setShowCreateModal(false)}

@@ -31,12 +31,12 @@ const upload = multer({
  */
 router.post('/user/register', async (req: Request, res: Response) => {
   try {
-    const { userId, email, name, role, profilePicture } = req.body;
+    const { userId, email, name, role, password, profilePicture } = req.body;
 
     // Validate required fields
-    if (!userId || !email || !name || !role) {
+    if (!userId || !email || !name || !role || !password) {
       return res.status(400).json({ 
-        error: 'Missing required fields: userId, email, name, role' 
+        error: 'Missing required fields: userId, email, name, role, password' 
       });
     }
 
@@ -44,6 +44,13 @@ router.post('/user/register', async (req: Request, res: Response) => {
     if (!Object.values(UserRole).includes(role)) {
       return res.status(400).json({ 
         error: 'Invalid role. Must be: student, alumni, or admin' 
+      });
+    }
+
+    // Validate password length
+    if (password.length < 6) {
+      return res.status(400).json({ 
+        error: 'Password must be at least 6 characters' 
       });
     }
 
@@ -55,12 +62,13 @@ router.post('/user/register', async (req: Request, res: Response) => {
       });
     }
 
-    // Create user
+    // Create user with password
     const user = new User({
       userId,
       email,
       name,
       role,
+      password, // Store plain password (in production, this should be hashed)
       profilePicture
     });
 
@@ -68,7 +76,7 @@ router.post('/user/register', async (req: Request, res: Response) => {
 
     res.status(201).json({
       success: true,
-      user: {
+      data: {
         userId: user.userId,
         email: user.email,
         name: user.name,
@@ -80,6 +88,55 @@ router.post('/user/register', async (req: Request, res: Response) => {
 
   } catch (error: any) {
     console.error('[Mentorship] User registration failed:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+/**
+ * POST /api/mentorship/user/login
+ * Login user with email and password
+ */
+router.post('/user/login', async (req: Request, res: Response) => {
+  try {
+    const { email, password } = req.body;
+
+    // Validate required fields
+    if (!email || !password) {
+      return res.status(400).json({ 
+        error: 'Email and password are required' 
+      });
+    }
+
+    // Find user by email
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(401).json({ 
+        error: 'Invalid email or password' 
+      });
+    }
+
+    // Verify password
+    if (user.password !== password) {
+      return res.status(401).json({ 
+        error: 'Invalid email or password' 
+      });
+    }
+
+    // Successful login
+    res.json({
+      success: true,
+      data: {
+        userId: user.userId,
+        email: user.email,
+        name: user.name,
+        role: user.role,
+        profilePicture: user.profilePicture,
+        createdAt: user.createdAt
+      }
+    });
+
+  } catch (error: any) {
+    console.error('[Mentorship] User login failed:', error);
     res.status(500).json({ error: error.message });
   }
 });
