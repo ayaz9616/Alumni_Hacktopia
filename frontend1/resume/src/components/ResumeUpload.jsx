@@ -215,27 +215,7 @@ function ResumeUpload({ onUploadSuccess }) {
       </div>
 
       {/* Resume List */}
-      {resumes.length > 0 && (
-        <div>
-          <h3 className="text-lg font-medium mb-4">Your Resumes</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {resumes.map((resume) => (
-              <div
-                key={resume.id}
-                className="border border-white/10 rounded-xl p-4 bg-neutral-950 hover:border-white/20 transition"
-              >
-                <p className="text-sm font-medium truncate">
-                  {resume.filename}
-                </p>
-                <p className="text-xs text-neutral-500 mt-1">
-                  Uploaded on{' '}
-                  {new Date(resume.created_at).toLocaleDateString()}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
+      
     </div>
   );
 }

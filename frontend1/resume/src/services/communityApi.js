@@ -108,6 +108,45 @@ export const addComment = async (postId, content) => {
   }
 };
 
+export const updateComment = async (postId, commentId, content) => {
+  try {
+    const userId = getUserId();
+    
+    const response = await axios.put(
+      `${API_URL}/feed/${postId}/comment/${commentId}`,
+      { content },
+      {
+        headers: {
+          'x-user-id': userId
+        }
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Error updating comment:', error);
+    throw error;
+  }
+};
+
+export const deleteComment = async (postId, commentId) => {
+  try {
+    const userId = getUserId();
+    
+    const response = await axios.delete(
+      `${API_URL}/feed/${postId}/comment/${commentId}`,
+      {
+        headers: {
+          'x-user-id': userId
+        }
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error('Error deleting comment:', error);
+    throw error;
+  }
+};
+
 export const deletePost = async (postId) => {
   try {
     const userId = getUserId();

@@ -77,8 +77,8 @@ router.get('/feed', async (req: Request, res: Response) => {
         votes: post.upvotes.length - post.downvotes.length,
         upvotes: post.upvotes,
         downvotes: post.downvotes,
-        comments: post.comments.length,
-        commentsList: post.comments
+        comments: post.comments,
+        totalComments: post.comments.length
       })),
       pagination: {
         total,
@@ -266,6 +266,91 @@ router.delete('/feed/:postId', async (req: Request, res: Response) => {
   } catch (error: any) {
     console.error('Error deleting post:', error);
     res.status(500).json({ success: false, message: 'Failed to delete post', error: error.message });
+  }
+});
+
+// Update comment
+router.put('/feed/:postId/comment/:commentId', async (req: Request, res: Response) => {
+  try {
+    const userId = req.headers['x-user-id'] as string;
+    if (!userId) {
+      return res.status(401).json({ success: false, message: 'User authentication required' });
+    }
+
+    const { postId, commentId } = req.params;
+    const { content } = req.body;
+
+    if (!content) {
+      return res.status(400).json({ success: false, message: 'Content is required' });
+    }
+
+    const post = await FeedPost.findOne({ postId });
+    if (!post) {
+      return res.status(404).json({ success: false, message: 'Post not found' });
+    }
+
+    const comment = post.comments.find(c => c.commentId === commentId);
+    if (!comment) {
+      return res.status(404).json({ success: false, message: 'Comment not found' });
+    }
+
+    if (comment.userId !== userId) {
+      return res.status(403).json({ success: false, message: 'You can only edit your own comments' });
+    }
+
+    comment.content = content;
+    comment.updatedAt = new Date();
+    post.updatedAt = new Date();
+    await post.save();
+
+    res.json({
+      success: true,
+      message: 'Comment updated successfully',
+      comment
+    });
+  } catch (error: any) {
+    console.error('Error updating comment:', error);
+    res.status(500).json({ success: false, message: 'Failed to update comment', error: error.message });
+  }
+});
+
+// Delete comment
+router.delete('/feed/:postId/comment/:commentId', async (req: Request, res: Response) => {
+  try {
+    const userId = req.headers['x-user-id'] as string;
+    if (!userId) {
+      return res.status(401).json({ success: false, message: 'User authentication required' });
+    }
+
+    const { postId, commentId } = req.params;
+
+    const post = await FeedPost.findOne({ postId });
+    if (!post) {
+      return res.status(404).json({ success: false, message: 'Post not found' });
+    }
+
+    const commentIndex = post.comments.findIndex(c => c.commentId === commentId);
+    if (commentIndex === -1) {
+      return res.status(404).json({ success: false, message: 'Comment not found' });
+    }
+
+    const comment = post.comments[commentIndex];
+    if (comment.userId !== userId) {
+      return res.status(403).json({ success: false, message: 'You can only delete your own comments' });
+    }
+
+    post.comments.splice(commentIndex, 1);
+    post.updatedAt = new Date();
+    await post.save();
+
+    res.json({
+      success: true,
+      message: 'Comment deleted successfully',
+      totalComments: post.comments.length
+    });
+  } catch (error: any) {
+    console.error('Error deleting comment:', error);
+    res.status(500).json({ success: false, message: 'Failed to delete comment', error: error.message });
   }
 });
 

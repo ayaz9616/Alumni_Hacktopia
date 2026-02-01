@@ -5,6 +5,7 @@ import About from './About';
 import Stats from './Stats';
 import PlatformModules from './PlatformModules';
 import FAQ from './FAQ';
+import TopRatedAlumni from './Internship';
 
 function Home() {
   const sectionRef = useRef(null);
@@ -45,6 +46,7 @@ function Home() {
       </section>
 
       <PlatformModules />
+            <TopRatedAlumni/>
       <FAQ />
     </div>
   );

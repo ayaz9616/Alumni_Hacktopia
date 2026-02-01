@@ -9,6 +9,7 @@ export interface IComment {
   userRole: 'student' | 'alumni';
   content: string;
   createdAt: Date;
+  updatedAt?: Date;
 }
 
 const CommentSchema = new Schema<IComment>({
@@ -17,7 +18,8 @@ const CommentSchema = new Schema<IComment>({
   userName: { type: String, required: true },
   userRole: { type: String, enum: ['student', 'alumni'], required: true },
   content: { type: String, required: true },
-  createdAt: { type: Date, default: Date.now }
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date }
 });
 
 export interface IFeedPost extends Document {

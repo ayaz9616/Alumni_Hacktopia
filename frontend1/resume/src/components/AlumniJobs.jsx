@@ -12,7 +12,7 @@ import {
 } from '../services/mentorshipApi';
 
 const CGPA_OPTIONS = [6, 6.5, 7, 7.5, 8, 8.5, 9];
-const BRANCHES = ['CSE', 'MNC', 'MAE', 'ECE', 'EEE', 'ME', 'CE'];
+const BRANCHES = ['CSE', 'MNC', 'MAE', 'ECE',];
 const BATCH_YEARS = [2025, 2026, 2027, 2028, 2029];
 
 const inputClass =
@@ -613,19 +613,20 @@ function AlumniJobs() {
                   {CGPA_OPTIONS.map((cgpa) => (
                     <button
                       key={cgpa}
+                      type="button"
                       onClick={() =>
                         setForm({
                           ...form,
                           minCGPA: form.minCGPA === cgpa ? null : cgpa,
                         })
                       }
-                      className={`px-4 py-1.5 rounded-full text-xs border transition ${
+                      className={`px-4 py-1.5 rounded-full text-xs font-medium border transition ${
                         form.minCGPA === cgpa
                           ? "bg-green-500/20 border-green-500/40 text-green-400"
                           : "border-white/10 text-neutral-400 hover:border-green-500/30 hover:text-white"
                       }`}
                     >
-                      â‰¥ {cgpa}
+                      {cgpa}
                     </button>
                   ))}
                 </div>
@@ -717,7 +718,7 @@ function AlumniJobs() {
                 }}
                 className="text-neutral-500 hover:text-white transition"
               >
-                âœ•
+                x
               </button>
             </div>
 
