@@ -34,10 +34,12 @@ const isAdminAuthenticated = () => {
 // Wrapper to conditionally show navbar
 function AppContent({ userProfile, onLogout }) {
   const location = useLocation();
-  const hiddenNavbarPaths = ['/profile', '/jobs', '/resumate', '/community', '/admin'];
+  const hiddenNavbarPaths = ['/profile', '/jobs', '/resumate', '/community', '/admin', '/onboarding', '/auth'];
   const shouldHideNavbar = (isAuthenticated() && isProfileComplete() && 
     hiddenNavbarPaths.some(path => location.pathname.startsWith(path))) || 
-    location.pathname.startsWith('/admin');
+    location.pathname.startsWith('/admin') ||
+    location.pathname === '/onboarding' ||
+    location.pathname === '/auth';
   const shouldShowFooter = location.pathname === '/' || location.pathname === '/alumni-directory';
 
   return (
@@ -49,9 +51,11 @@ function AppContent({ userProfile, onLogout }) {
         <Route path="/about" element={<Home />} />
         <Route path="/features" element={<Home />} />
         <Route path="/auth" element={
-          isAuthenticated() 
+          isAuthenticated() && isProfileComplete()
             ? <Navigate to="/" replace />
-            : <Auth onAuthSuccess={() => window.location.reload()} />
+            : isAuthenticated() && !isProfileComplete()
+            ? <Navigate to="/onboarding" replace />
+            : <Auth />
         } />
 
         {/* Donation (Public) */}
@@ -180,6 +184,31 @@ function App() {
         setUserProfile(profile);
       }
     }
+    
+    // Listen for storage changes (profile completion, auth changes)
+    const handleStorageChange = (e) => {
+      if (e.key === 'resumate_profile_complete' || 
+          e.key === 'resumate_user_id' || 
+          e.key === 'resumate_user_role' ||
+          e.key === 'resumate_user_name') {
+        const newProfile = isAuthenticated() ? getUserProfile() : null;
+        setUserProfile(newProfile);
+      }
+    };
+
+    // Listen for custom profile update event
+    const handleProfileUpdate = () => {
+      const newProfile = isAuthenticated() ? getUserProfile() : null;
+      setUserProfile(newProfile);
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('profileUpdated', handleProfileUpdate);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('profileUpdated', handleProfileUpdate);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

@@ -196,7 +196,14 @@ function Onboarding() {
       }
 
       setProfileComplete(true);
-      navigate('/');
+      
+      // Dispatch event to notify App component of profile completion
+      window.dispatchEvent(new Event('profileUpdated'));
+      
+      // Small delay to ensure event is processed before navigation
+      setTimeout(() => {
+        navigate('/');
+      }, 100);
     } catch (err) {
       console.error('Submission error:', err);
       setError(err.message || 'Failed to complete onboarding');

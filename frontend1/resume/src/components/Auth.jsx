@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { getUserProfile, setUserProfile, generateUserId } from '../lib/authManager';
 import { registerUser, loginUser } from '../services/mentorshipApi';
 
-function Auth({ onAuthSuccess }) {
+function Auth() {
   const navigate = useNavigate();
   const [mode, setMode] = useState('login'); // 'login', 'signup', 'forgot'
   const [name, setName] = useState('');
@@ -42,7 +42,15 @@ function Auth({ onAuthSuccess }) {
           email: response.data.email
         });
 
-        onAuthSuccess(response.data);
+        // Dispatch event to notify App component of auth changes
+        window.dispatchEvent(new Event('profileUpdated'));
+
+        // Navigate to onboarding if profile not complete, otherwise home
+        if (response.data.profileComplete) {
+          navigate('/');
+        } else {
+          navigate('/onboarding');
+        }
       } else {
         throw new Error(response.error || 'Invalid email or password');
       }
@@ -99,6 +107,9 @@ function Auth({ onAuthSuccess }) {
           name,
           email
         });
+
+        // Dispatch event to notify App component of auth changes
+        window.dispatchEvent(new Event('profileUpdated'));
 
         // Redirect to onboarding
         navigate('/onboarding');
